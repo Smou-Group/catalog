@@ -34,6 +34,7 @@ header{
   gap:8px;
   padding:10px;
   background:#093055;
+  flex-wrap:wrap;
 }
 
 button{
@@ -109,8 +110,8 @@ canvas{
 
 <script>
 
-// ✅ استخدام الرابط الكامل يمنع أي خطأ مسار
-const PDF_URL = window.location.origin + "/profile-smou-group-2026.pdf";
+// ✅ استخدام الرابط الكامل يحل المشكلة نهائيًا
+const PDF_URL = "https://catalog.smougroup.com/profile-smou-group-2026.pdf";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
@@ -185,7 +186,7 @@ async function loadPDF(){
     fit();
 
   }catch(e){
-    alert("PDF loading error. Check file path.");
+    alert("PDF loading error. Verify file access permissions.");
   }
 }
 
