@@ -1,50 +1,131 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMOU Group – Company Profile 2026</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SMOU Group – Company Profile 2026</title>
 
-<style>
-body{
-  margin:0;
-  background:#0b3c6d;
-  font-family:Arial,Helvetica,sans-serif;
-  display:flex;
-  flex-direction:column;
-  height:100vh;
-}
-
-header{
-  background:#0a345f;
-  color:#fff;
-  padding:15px;
-  text-align:center;
-  font-weight:bold;
-}
-
-.viewer{
-  flex:1;
-  background:#fff;
-}
-
-iframe{
-  width:100%;
-  height:100%;
-  border:none;
-}
-</style>
+  <style>
+    :root{--brand:#0b3c6d;--brand2:#0a345f;}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:var(--brand);
+      color:#fff;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    header{
+      background:var(--brand2);
+      padding:14px 12px;
+      text-align:center;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .toolbar{
+      background:#093055;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:center;
+      padding:10px 12px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.25);
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      padding:8px 12px;
+      border-radius:10px;
+      font-weight:600;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn:hover{background:rgba(255,255,255,.14)}
+    .wrap{
+      flex:1;
+      padding:12px;
+      overflow:hidden;
+    }
+    .panel{
+      height:100%;
+      background:rgba(255,255,255,.08);
+      border-radius:14px;
+      box-shadow:0 20px 50px rgba(0,0,0,.25);
+      overflow:hidden;
+      position:relative;
+    }
+    iframe{
+      width:100%;
+      height:100%;
+      border:0;
+      background:#fff;
+    }
+    .note{
+      font-size:12px;
+      opacity:.85;
+      text-align:center;
+      padding:6px 12px 0;
+    }
+  </style>
 </head>
 
 <body>
+  <header>SMOU Group – Company Profile 2026</header>
 
-<header>SMOU Group – Company Profile 2026</header>
+  <div class="toolbar">
+    <a class="btn" id="openPdf" href="https://catalog.smougroup.com/profile-smou-group-2026.pdf" target="_blank" rel="noopener">
+      Open PDF
+    </a>
 
-<div class="viewer">
-  <iframe 
-    src="https://docs.google.com/gview?url=https://catalog.smougroup.com/profile-smou-group-2026.pdf&embedded=true">
-  </iframe>
-</div>
+    <button class="btn" id="fsBtn" type="button">Fullscreen</button>
 
+    <a class="btn" id="downloadPdf" href="https://catalog.smougroup.com/profile-smou-group-2026.pdf" download>
+      Download
+    </a>
+  </div>
+
+  <div class="wrap">
+    <div class="panel" id="panel">
+      <!-- عرض PDF بشكل مباشر داخل iframe -->
+      <iframe
+        src="https://catalog.smougroup.com/profile-smou-group-2026.pdf#zoom=page-width"
+        allow="fullscreen"
+      ></iframe>
+    </div>
+    <div class="note">Use browser zoom (Ctrl + / Ctrl -) and the PDF viewer controls for zoom in/out.</div>
+  </div>
+
+  <script>
+    const panel = document.getElementById('panel');
+    const fsBtn = document.getElementById('fsBtn');
+
+    async function toggleFullscreen(){
+      try{
+        if(!document.fullscreenElement){
+          await panel.requestFullscreen();
+          fsBtn.textContent = 'Exit Fullscreen';
+        }else{
+          await document.exitFullscreen();
+          fsBtn.textContent = 'Fullscreen';
+        }
+      }catch(e){
+        // لو المتصفح منعها لأي سبب، افتح PDF في تبويب جديد
+        window.open('https://catalog.smougroup.com/profile-smou-group-2026.pdf', '_blank');
+      }
+    }
+
+    fsBtn.addEventListener('click', toggleFullscreen);
+
+    document.addEventListener('fullscreenchange', () => {
+      fsBtn.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Fullscreen';
+    });
+  </script>
 </body>
 </html>
