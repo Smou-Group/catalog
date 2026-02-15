@@ -23,7 +23,10 @@
       padding:8px 12px;border-radius:10px;font-weight:600
     }
     .btn:hover{background:rgba(255,255,255,.14)}
-    .status{font-size:13px;opacity:.9;margin-left:6px;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .status{
+      font-size:13px;opacity:.9;margin-left:6px;
+      max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
 
     #stage{flex:1;display:flex;justify-content:center;align-items:center;padding:12px;overflow:hidden;}
     #viewer{
@@ -47,7 +50,7 @@
     canvas{display:block;}
   </style>
 
-  <!-- Load order -->
+  <!-- ✅ Load order مهم -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
@@ -73,7 +76,7 @@
   </div>
 
 <script>
-  // ✅ ضع اسم ملفك الحقيقي هنا بالضبط
+  // ✅ لازم اسم الملف يكون مطابق 100%
   const PDF_URL = "profile-smou-group-2026.pdf";
 
   pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -95,15 +98,11 @@
 
   function fitToViewer(){
     if(!bookInited) return;
-
     const vw = viewerEl.clientWidth - 24;
     const vh = viewerEl.clientHeight - 24;
 
     const size = $("#flipbook").turn("size");
-    const bookW = size.width;
-    const bookH = size.height;
-
-    const s = Math.min(vw / bookW, vh / bookH);
+    const s = Math.min(vw / size.width, vh / size.height);
     setZoom(s);
   }
 
@@ -114,7 +113,6 @@
 
       setStatus(`Rendering pages… (${pdf.numPages})`);
 
-      // Render pages in order
       for(let pageNum=1; pageNum<=pdf.numPages; pageNum++){
         const page = await pdf.getPage(pageNum);
         const viewport = page.getViewport({ scale: 1.35 });
@@ -132,7 +130,6 @@
         flipbookEl.appendChild(pageDiv);
       }
 
-      // Init turn.js once
       const firstCanvas = flipbookEl.querySelector("canvas");
       const pageW = firstCanvas.width;
       const pageH = firstCanvas.height;
@@ -150,7 +147,7 @@
       setStatus("✅ Ready");
       fitToViewer();
 
-      window.addEventListener("resize", () => fitToViewer());
+      window.addEventListener("resize", fitToViewer);
 
     }catch(err){
       console.error(err);
@@ -161,28 +158,19 @@
   // Controls
   document.getElementById("prev").onclick = () => $("#flipbook").turn("previous");
   document.getElementById("next").onclick = () => $("#flipbook").turn("next");
-
   document.getElementById("zoomIn").onclick = () => setZoom(zoom + 0.1);
   document.getElementById("zoomOut").onclick = () => setZoom(zoom - 0.1);
-  document.getElementById("fit").onclick = () => fitToViewer();
+  document.getElementById("fit").onclick = fitToViewer;
 
   document.getElementById("fs").onclick = async () => {
-    try{
-      if(!document.fullscreenElement){
-        await viewerEl.requestFullscreen();
-      }else{
-        await document.exitFullscreen();
-      }
-      setTimeout(fitToViewer, 300);
-    }catch(e){}
+    if(!document.fullscreenElement) await viewerEl.requestFullscreen();
+    else await document.exitFullscreen();
+    setTimeout(fitToViewer, 300);
   };
 
-  // Keyboard
   document.addEventListener("keydown", (e) => {
     if(e.key === "ArrowLeft") $("#flipbook").turn("previous");
     if(e.key === "ArrowRight") $("#flipbook").turn("next");
-    if(e.key === "+") setZoom(zoom + 0.1);
-    if(e.key === "-") setZoom(zoom - 0.1);
   });
 
   buildFlipbook();
