@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMOU Group – Company Profile 2026</title>
+
+  <style>
+    :root{--brand:#0b3c6d;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--brand);color:#fff;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+    header{background:#0a345f;padding:14px 12px;text-align:center;font-weight:700}
+    .toolbar{display:flex;gap:8px;justify-content:center;align-items:center;padding:10px;background:#093055;flex-wrap:wrap}
+    .btn{cursor:pointer;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;padding:8px 12px;border-radius:10px;font-weight:600}
+    .btn:hover{background:rgba(255,255,255,.14)}
+    .status{font-size:13px;opacity:.9;margin-left:6px;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    #stage{flex:1;display:flex;justify-content:center;align-items:center;padding:12px;overflow:hidden;}
+    #viewer{width:min(1280px,95vw);height:calc(100vh - 140px);background:rgba(255,255,255,.08);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.25);position:relative;overflow:hidden;}
+    #flipbook{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(1);transform-origin:center center;}
+    #flipbook .page{background:#fff;display:flex;justify-content:center;align-items:center;}
+    canvas{display:block;}
+  </style>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+</head>
+
+<body>
+  <header>SMOU Group – Company Profile 2026</header>
+
+  <div class="toolbar">
+    <button class="btn" id="prev">◀ Prev</button>
+    <button class="btn" id="next">Next ▶</button>
+    <button class="btn" id="zoomOut">－</button>
+    <button class="btn" id="zoomIn">＋</button>
+    <button class="btn" id="fit">Fit</button>
+    <button class="btn" id="fs">Fullscreen</button>
+    <span class="status" id="status">Loading…</span>
+  </div>
+
+  <div id="stage">
+    <div id="viewer">
+      <div id="flipbook"></div>
+    </div>
+  </div>
+
+<script>
+  const PDF_URL = "profile-smou-group-2026.pdf";
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+
+  const statusEl = document.getElementById("status");
+  const flipbookEl = document.getElementById("flipbook");
+  const viewerEl = document.getElementById("viewer");
+
+  let zoom = 1;
+  let bookInited = false;
+
+  function setStatus(t){ statusEl.textContent = t; }
+  function setZoom(z){
+    zoom = Math.max(0.6, Math.min(2.5, z));
+    flipbookEl.style.transform = `translate(-50%,-50%) scale(${zoom})`;
+  }
+  function fitToViewer(){
+    if(!bookInited) return;
+    const vw = viewerEl.clientWidth - 24;
+    const vh = viewerEl.clientHeight - 24;
+    const size = $("#flipbook").turn("size");
+    setZoom(Math.min(vw / size.width, vh / size.height));
+  }
+
+  async function buildFlipbook(){
+    try{
+      setStatus("Loading PDF…");
+      const pdf = await pdfjsLib.getDocument(PDF_URL).promise;
+
+      setStatus(`Rendering pages… (${pdf.numPages})`);
+      for(let p=1; p<=pdf.numPages; p++){
+        const page = await pdf.getPage(p);
+        const viewport = page.getViewport({ scale: 1.35 });
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        await page.render({ canvasContext: ctx, viewport }).promise;
+
+        const pageDiv = document.createElement("div");
+        pageDiv.className = "page";
+        pageDiv.appendChild(canvas);
+        flipbookEl.appendChild(pageDiv);
+      }
+
+      const first = flipbookEl.querySelector("canvas");
+      $("#flipbook").turn({
+        width: first.width * 2,
+        height: first.height,
+        autoCenter: true,
+        display: "double",
+        gradients: true,
+        elevation: 50
+      });
+
+      bookInited = true;
+      setStatus("✅ Ready");
+      fitToViewer();
+      window.addEventListener("resize", fitToViewer);
+    }catch(err){
+      console.error(err);
+      setStatus("❌ PDF not found. Check file name/location.");
+    }
+  }
+
+  document.getElementById("prev").onclick = () => $("#flipbook").turn("previous");
+  document.getElementById("next").onclick = () => $("#flipbook").turn("next");
+  document.getElementById("zoomIn").onclick = () => setZoom(zoom + 0.1);
+  document.getElementById("zoomOut").onclick = () => setZoom(zoom - 0.1);
+  document.getElementById("fit").onclick = fitToViewer;
+  document.getElementById("fs").onclick = async () => {
+    if(!document.fullscreenElement) await viewerEl.requestFullscreen();
+    else await document.exitFullscreen();
+    setTimeout(fitToViewer, 300);
+  };
+
+  buildFlipbook();
+</script>
+
+</body>
+</html>
