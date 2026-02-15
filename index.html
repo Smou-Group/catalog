@@ -1,58 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>SMOU Group | Company Profile 2026</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>SMOU Group – Company Profile 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Redirect -->
-    <meta http-equiv="refresh" content="2; url=https://www.flipsnack.com/ADDAEAF7C6F/profile-smou-group-2026/full-view.html">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #0b3c6d;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-        }
+<style>
+body {
+    margin: 0;
+    background: #0b3c6d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
 
-        .container {
-            max-width: 600px;
-        }
+#flipbook {
+    width: 90%;
+    height: 90vh;
+}
 
-        h1 {
-            margin-bottom: 15px;
-        }
-
-        p {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-
-        a {
-            color: #ffffff;
-            font-weight: bold;
-            text-decoration: underline;
-        }
-    </style>
+canvas {
+    width: 100%;
+    height: auto;
+}
+</style>
 </head>
 
 <body>
 
-<div class="container">
-    <h1>SMOU Group – Company Profile 2026</h1>
-    <p>You are being redirected to the official profile viewer...</p>
-    <p>If the page does not load automatically, <br>
-        <a href="https://www.flipsnack.com/ADDAEAF7C6F/profile-smou-group-2026/full-view.html">
-            Click here to open the profile
-        </a>
-    </p>
-</div>
+<div id="flipbook"></div>
+
+<script>
+var url = 'profile-smou-group-2026.pdf';
+
+pdfjsLib.getDocument(url).promise.then(function(pdf) {
+    for (let i = 1; i <= pdf.numPages; i++) {
+        pdf.getPage(i).then(function(page) {
+            var scale = 1.5;
+            var viewport = page.getViewport({ scale: scale });
+
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            page.render({
+                canvasContext: context,
+                viewport: viewport
+            });
+
+            var div = document.createElement('div');
+            div.appendChild(canvas);
+            document.getElementById('flipbook').appendChild(div);
+
+            if (i === pdf.numPages) {
+                $('#flipbook').turn({
+                    width: $('#flipbook').width(),
+                    height: $('#flipbook').height(),
+                    autoCenter: true
+                });
+            }
+        });
+    }
+});
+</script>
 
 </body>
 </html>
