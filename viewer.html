@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMOU Group – Company Profile 2026</title>
+
+<style>
+:root { --brand:#0b3c6d; }
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--brand);
+  color:#fff;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+header{
+  background:#0a345f;
+  padding:14px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.toolbar{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  padding:10px;
+  background:#093055;
+  flex-wrap:wrap;
+}
+
+button{
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button:hover{
+  background:rgba(255,255,255,.15);
+}
+
+#stage{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+
+#viewer{
+  width:95%;
+  height:90%;
+  position:relative;
+  background:rgba(255,255,255,.08);
+  border-radius:14px;
+}
+
+#flipbook{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) scale(1);
+  transform-origin:center;
+}
+
+.page{
+  background:#fff;
+}
+
+canvas{
+  display:block;
+}
+</style>
+
+<!-- ترتيب التحميل مهم -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+</head>
+<body>
+
+<header>SMOU Group – Company Profile 2026</header>
+
+<div class="toolbar">
+  <button onclick="$('#flipbook').turn('previous')">◀ Prev</button>
+  <button onclick="$('#flipbook').turn('next')">Next ▶</button>
+  <button onclick="zoomOut()">-</button>
+  <button onclick="zoomIn()">+</button>
+  <button onclick="fit()">Fit</button>
+</div>
+
+<div id="stage">
+  <div id="viewer">
+    <div id="flipbook"></div>
+  </div>
+</div>
+
+<script>
+
+// ✅ استخدام الرابط الكامل يحل المشكلة نهائيًا
+const PDF_URL = "https://catalog.smougroup.com/profile-smou-group-2026.pdf";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+
+let zoomLevel = 1;
+let initialized = false;
+
+function zoomIn(){
+  zoomLevel += 0.1;
+  updateZoom();
+}
+
+function zoomOut(){
+  zoomLevel -= 0.1;
+  updateZoom();
+}
+
+function updateZoom(){
+  zoomLevel = Math.max(0.6, Math.min(2.5, zoomLevel));
+  document.getElementById("flipbook").style.transform =
+  `translate(-50%,-50%) scale(${zoomLevel})`;
+}
+
+function fit(){
+  if(!initialized) return;
+  const viewer = document.getElementById("viewer");
+  const size = $("#flipbook").turn("size");
+
+  const scaleW = viewer.clientWidth / size.width;
+  const scaleH = viewer.clientHeight / size.height;
+
+  zoomLevel = Math.min(scaleW, scaleH);
+  updateZoom();
+}
+
+async function loadPDF(){
+  try{
+    const pdf = await pdfjsLib.getDocument(PDF_URL).promise;
+
+    for(let i=1;i<=pdf.numPages;i++){
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({scale:1.3});
+
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      await page.render({
+        canvasContext:context,
+        viewport:viewport
+      }).promise;
+
+      const div = document.createElement("div");
+      div.className = "page";
+      div.appendChild(canvas);
+
+      document.getElementById("flipbook").appendChild(div);
+    }
+
+    const firstCanvas = document.querySelector("canvas");
+
+    $("#flipbook").turn({
+      width: firstCanvas.width * 2,
+      height: firstCanvas.height,
+      autoCenter:true,
+      display:"double"
+    });
+
+    initialized = true;
+    fit();
+
+  }catch(e){
+    alert("PDF loading error. Verify file access permissions.");
+  }
+}
+
+loadPDF();
+
+</script>
+
+</body>
+</html>
